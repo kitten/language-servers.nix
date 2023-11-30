@@ -31,7 +31,7 @@ pkgs.stdenv.mkDerivation rec {
     chmod a+rwx $out/node_modules
     cp -a ${modules}/deps/typescript-language-server-modules/node_modules/typescript-language-server \
       $out/node_modules
-    makeWrapper $out/node_modules/typescript-language-server/lib/cli.js $out/bin/${pname}
+    makeWrapper $out/node_modules/typescript-language-server/lib/cli.mjs $out/bin/${pname}
   '';
 
   dontUnpack = true;
