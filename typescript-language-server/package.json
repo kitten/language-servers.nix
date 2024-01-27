@@ -1,8 +1,8 @@
 {
-  "name": "typescript-language-server",
+  "name": "typescript-language-server-bun",
   "version": "1.0.0",
   "license": "ISC",
   "dependencies": {
-    "typescript-language-server": "^4.3.1"
+    "typescript-language-server": "^4.3.3"
   }
 }
