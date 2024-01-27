@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "license": "ISC",
   "dependencies": {
-    "svelte-language-server": "^0.16.1"
+    "svelte-language-server": "^0.16.3"
   }
 }

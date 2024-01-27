@@ -10,7 +10,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        nodejs = pkgs.nodejs-18_x;
+        nodejs = pkgs.nodejs_20;
       in
       {
         packages.angular-language-server = pkgs.callPackage ./angular-language-server { inherit nodejs; };
@@ -21,7 +21,7 @@
 
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
-            nodejs-18_x
+            nodejs_20
             yarn
           ];
         };
