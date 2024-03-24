@@ -10,20 +10,15 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        nodejs = pkgs.nodejs_20;
+        bun = pkgs.bun;
       in
       {
-        packages.angular-language-server = pkgs.callPackage ./angular-language-server { inherit nodejs; };
-        packages.jdt-language-server = pkgs.callPackage ./jdt-language-server { };
-        packages.svelte-language-server = pkgs.callPackage ./svelte-language-server { };
-        packages.typescript-language-server = pkgs.callPackage ./typescript-language-server { };
-        packages.vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted { };
+        packages.astro-language-server = pkgs.callPackage ./astro-language-server { inherit bun; };
+        packages.typescript-language-server = pkgs.callPackage ./typescript-language-server { inherit bun; };
+        packages.vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted { inherit bun; };
 
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nodejs_20
-            yarn
-          ];
+          buildInputs = [ bun ];
         };
       });
 }
