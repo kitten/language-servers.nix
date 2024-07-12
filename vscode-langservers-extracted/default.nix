@@ -1,7 +1,7 @@
 { bun, pkgs, ... }:
 
 let
-  node = pkgs.nodejs_20;
+  node = pkgs.nodejs_22;
   version =
     let packageJson = with builtins; fromJSON (
       readFile ./package.json);
