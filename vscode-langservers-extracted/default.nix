@@ -1,7 +1,6 @@
 { bun, pkgs, ... }:
 
 let
-  node = pkgs.nodejs_22;
   version =
     let packageJson = with builtins; fromJSON (
       readFile ./package.json);
@@ -10,7 +9,7 @@ in
 pkgs.stdenv.mkDerivation {
   pname = "vscode-langservers-extracted";
   inherit version;
-  nativeBuildInputs = [ bun node pkgs.makeBinaryWrapper ];
+  nativeBuildInputs = [ bun pkgs.makeBinaryWrapper ];
   dontConfigure = true;
   dontBuild = true;
   dontStrip = true;
@@ -41,8 +40,8 @@ pkgs.stdenv.mkDerivation {
       --add-flags "run --bun --prefer-offline --no-install $out/vscode-html-language-server.js"
     makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-json-language-server \
       --add-flags "run --bun --prefer-offline --no-install $out/vscode-json-language-server.js"
-    makeBinaryWrapper ${node}/bin/node $out/bin/vscode-eslint-language-server \
-      --add-flags "$out/vscode-eslint-language-server.js"
+    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-eslint-language-server \
+      --add-flags "run --bun --prefer-offline --no-install $out/vscode-eslint-language-server.js"
     makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-markdown-language-server \
       --add-flags "run --bun --prefer-offline --no-install $out/vscode-markdown-language-server.js"
   '';
