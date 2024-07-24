@@ -1,15 +1,19 @@
 { bun, pkgs, ... }:
 
 let
-  version =
-    let packageJson = with builtins; fromJSON (
-      readFile ./package.json);
-    in builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies.vscode-langservers-extracted);
+  packageJson = builtins.fromJSON (builtins.readFile ./package.json);
+  version = builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies.vscode-langservers-extracted);
+
+  node-modules = pkgs.mkYarnPackage {
+    name = "${packageJson.name}-node-modules";
+    src = ./.;
+  };
 in
 pkgs.stdenv.mkDerivation {
   pname = "vscode-langservers-extracted";
   inherit version;
-  nativeBuildInputs = [ bun pkgs.makeBinaryWrapper ];
+  nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+  buildInputs = [ bun node-modules ];
   dontConfigure = true;
   dontBuild = true;
   dontStrip = true;
@@ -21,7 +25,6 @@ pkgs.stdenv.mkDerivation {
     ./vscode-eslint-language-server.js
     ./vscode-markdown-language-server.js
     ./package.json
-    ./bun.lockb
   ];
 
   unpackPhase = ''
@@ -33,7 +36,8 @@ pkgs.stdenv.mkDerivation {
 
   installPhase = ''
     cd $out
-    bun install --no-progress --no-cache --frozen-lockfile
+    ln -s ${node-modules}/libexec/${packageJson.name}/node_modules node_modules
+
     makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-css-language-server \
       --add-flags "run --bun --prefer-offline --no-install $out/vscode-css-language-server.js"
     makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-html-language-server \

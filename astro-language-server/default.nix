@@ -1,15 +1,19 @@
 { lib, bun, pkgs, ... }:
 
 let
-  version =
-    let packageJson = with builtins; fromJSON (
-      readFile ./package.json);
-    in builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies."@astrojs/language-server");
+  packageJson = builtins.fromJSON (builtins.readFile ./package.json);
+  version = builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies."@astrojs/language-server");
+
+  node-modules = pkgs.mkYarnPackage {
+    name = "${packageJson.name}-node-modules";
+    src = ./.;
+  };
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "astro-language-server";
   inherit version;
-  nativeBuildInputs = [ bun pkgs.makeBinaryWrapper ];
+  nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+  buildInputs = [ bun node-modules ];
   dontBuild = true;
   dontConfigure = true;
   dontStrip = true;
@@ -17,7 +21,6 @@ pkgs.stdenv.mkDerivation rec {
   src = [
     ./astro-language-server.js
     ./package.json
-    ./bun.lockb
   ];
 
   unpackPhase = ''
@@ -29,7 +32,8 @@ pkgs.stdenv.mkDerivation rec {
 
   installPhase = ''
     cd $out
-    bun install --no-progress --no-cache --frozen-lockfile
+    ln -s ${node-modules}/libexec/${packageJson.name}/node_modules node_modules
+
     makeBinaryWrapper ${bun}/bin/bun $out/bin/${pname} \
       --add-flags "run --bun --prefer-offline --no-install $out/${pname}.js"
   '';
