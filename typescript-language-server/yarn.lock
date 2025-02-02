@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@vercel/ncc@^0.38.3":
+  version "0.38.3"
+  resolved "https://registry.yarnpkg.com/@vercel/ncc/-/ncc-0.38.3.tgz#5475eeee3ac0f1a439f237596911525a490a88b5"
+  integrity sha512-rnK6hJBS6mwc+Bkab+PGPs9OiS0i/3kdTO+CkI8V0/VrW3vmz7O2Pxjw/owOlmo6PKEIxRSeZKv/kuL9itnpYA==
+
 typescript-language-server@^4.3.3:
   version "4.3.3"
   resolved "https://registry.yarnpkg.com/typescript-language-server/-/typescript-language-server-4.3.3.tgz#b52836fa0ec7a9c05007af44d5a49605f5fe72e0"
