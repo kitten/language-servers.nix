@@ -16,6 +16,7 @@
         packages.astro-language-server = pkgs.callPackage ./astro-language-server { inherit bun; };
         packages.typescript-language-server = pkgs.callPackage ./typescript-language-server { inherit bun; };
         packages.vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted { inherit bun; };
+        packages.vtsls = pkgs.callPackage ./vtsls { inherit bun; };
 
         devShell = pkgs.mkShell {
           buildInputs = [ bun ];
