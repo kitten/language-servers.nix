@@ -7,21 +7,20 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    let
+      default = pkgs: import ./default.nix { inherit pkgs; };
+    in
+    {
+      overlays.default = final: prev: default prev;
+    }
+    //
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        bun = pkgs.bun;
-        inputs = { inherit bun; };
       in
       {
-        packages = let
-          vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted inputs;
-        in {
-          typescript-language-server = pkgs.callPackage ./typescript-language-server inputs;
-          vtsls = pkgs.callPackage ./vtsls inputs;
-        } // vscode-langservers-extracted;
-
-        devShell = pkgs.mkShell {
+        packages = default pkgs;
+        devShell = with pkgs; pkgs.mkShell {
           buildInputs = [ bun ];
         };
       });
