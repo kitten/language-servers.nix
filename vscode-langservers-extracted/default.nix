@@ -1,52 +1,39 @@
-{ bun, pkgs, ... }:
+{ lib, bun, pkgs, ... }:
 
+with builtins; with pkgs;
 let
-  packageJson = builtins.fromJSON (builtins.readFile ./package.json);
-  version = builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies.vscode-langservers-extracted);
-
-  node-modules = pkgs.mkYarnPackage {
-    name = "${packageJson.name}-node-modules";
-    src = ./.;
+  inherit (fromJSON (readFile ./package.json)) version;
+  src = ./.;
+  yarnOfflineCache = fetchYarnDeps {
+    yarnLock = ./yarn.lock;
+    hash = "sha256-IBEYfVrgINScJB2Ro2cu50hP2ebQ3j7JUz6bq+uTXZQ=";
   };
-in
-pkgs.stdenv.mkDerivation {
-  pname = "vscode-langservers-extracted";
-  inherit version;
-  nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-  buildInputs = [ bun node-modules ];
-  dontConfigure = true;
-  dontBuild = true;
-  dontStrip = true;
-
-  src = [
-    ./vscode-css-language-server.js
-    ./vscode-html-language-server.js
-    ./vscode-json-language-server.js
-    ./vscode-eslint-language-server.js
-    ./vscode-markdown-language-server.js
-    ./package.json
-  ];
-
-  unpackPhase = ''
-    mkdir -p $out/bin
-    for srcFile in $src; do
-      cp $srcFile "$out/$(stripHash $srcFile)"
-    done
-  '';
-
-  installPhase = ''
-    cd $out
-    ln -s ${node-modules}/libexec/${packageJson.name}/node_modules node_modules
-
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-css-language-server \
-      --add-flags "run --bun --prefer-offline --no-install $out/vscode-css-language-server.js"
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-html-language-server \
-      --add-flags "run --bun --prefer-offline --no-install $out/vscode-html-language-server.js"
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-json-language-server \
-      --add-flags "run --bun --prefer-offline --no-install $out/vscode-json-language-server.js"
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-eslint-language-server \
-      --add-flags "run --bun --prefer-offline --no-install $out/vscode-eslint-language-server.js"
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/vscode-markdown-language-server \
-      --add-flags "run --bun --prefer-offline --no-install $out/vscode-markdown-language-server.js"
-  '';
+  mkDerivationInputs = (name: yarnBuildScript: {
+    inherit name src yarnOfflineCache yarnBuildScript;
+    doDist = false;
+    buildInputs = [ bun ];
+    nativeBuildInputs = [
+      makeBinaryWrapper
+      yarnConfigHook
+      yarnBuildHook
+      nodejs
+    ];
+    postInstall = ''
+      mkdir -p $out/build
+      cp -r build/** $out/build
+      makeBinaryWrapper ${bun}/bin/bun $out/bin/${name} \
+        --add-flags "run --bun --prefer-offline --no-install $out/build/index.js"
+    '';
+  });
+in {
+  vscode-css-language-server =
+    stdenv.mkDerivation (mkDerivationInputs "vscode-css-language-server" "build:css");
+  vscode-eslint-language-server =
+    stdenv.mkDerivation (mkDerivationInputs "vscode-eslint-language-server" "build:eslint");
+  vscode-html-language-server =
+    stdenv.mkDerivation (mkDerivationInputs "vscode-html-language-server" "build:html");
+  vscode-json-language-server =
+    stdenv.mkDerivation (mkDerivationInputs "vscode-json-language-server" "build:json");
+  vscode-markdown-language-server =
+    stdenv.mkDerivation (mkDerivationInputs "vscode-markdown-language-server" "build:markdown");
 }

@@ -11,12 +11,15 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         bun = pkgs.bun;
+        inputs = { inherit bun; };
       in
       {
-        packages.astro-language-server = pkgs.callPackage ./astro-language-server { inherit bun; };
-        packages.typescript-language-server = pkgs.callPackage ./typescript-language-server { inherit bun; };
-        packages.vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted { inherit bun; };
-        packages.vtsls = pkgs.callPackage ./vtsls { inherit bun; };
+        packages = let
+          vscode-langservers-extracted = pkgs.callPackage ./vscode-langservers-extracted inputs;
+        in {
+          typescript-language-server = pkgs.callPackage ./typescript-language-server inputs;
+          vtsls = pkgs.callPackage ./vtsls inputs;
+        } // vscode-langservers-extracted;
 
         devShell = pkgs.mkShell {
           buildInputs = [ bun ];
