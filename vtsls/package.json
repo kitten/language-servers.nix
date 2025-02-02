@@ -1,9 +1,15 @@
 {
-  "name": "vtsls-bun",
-  "version": "1.0.0",
-  "license": "ISC",
-  "dependencies": {
+  "name": "vtsls-bin",
+  "private": true,
+  "version": "0.2.8",
+  "main": "bin.js",
+  "scripts": {
+    "build": "ncc build --no-cache --out build"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
     "@vtsls/language-server": "^0.2.8"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
+
 }

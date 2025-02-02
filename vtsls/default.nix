@@ -1,40 +1,29 @@
 { lib, bun, pkgs, ... }:
 
+with builtins; with pkgs;
 let
-  packageJson = builtins.fromJSON (builtins.readFile ./package.json);
-  version = builtins.replaceStrings [ "^" "~" ] [ "" "" ] (packageJson.dependencies.typescript-language-server);
-
-  node-modules = pkgs.mkYarnPackage {
-    name = "${packageJson.name}-node-modules";
-    src = ./.;
-  };
+  inherit (fromJSON (readFile ./package.json)) version;
 in
-pkgs.stdenv.mkDerivation rec {
-  pname = "vtsls";
+stdenv.mkDerivation rec {
+  name = "vtsls";
   inherit version;
-  nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-  buildInputs = [ bun node-modules ];
-  dontConfigure = true;
-  dontBuild = true;
-  dontStrip = true;
-
-  src = [
-    ./vtsls.js
-    ./package.json
+  src = ./.;
+  doDist = false;
+  yarnOfflineCache = fetchYarnDeps {
+    yarnLock = ./yarn.lock;
+    hash = "sha256-9vLavcshk6tXgPjb0P5JwxfxhayXW1TrHh4q7mGSxls=";
+  };
+  buildInputs = [ bun ];
+  nativeBuildInputs = [
+    makeBinaryWrapper
+    yarnConfigHook
+    yarnBuildHook
+    nodejs
   ];
-
-  unpackPhase = ''
-    mkdir -p $out/bin
-    for srcFile in $src; do
-      cp $srcFile "$out/$(stripHash $srcFile)"
-    done
-  '';
-
-  installPhase = ''
-    cd $out
-    ln -s ${node-modules}/libexec/${packageJson.name}/node_modules node_modules
-
-    makeBinaryWrapper ${bun}/bin/bun $out/bin/${pname} \
-      --add-flags "run --bun --prefer-offline --no-install $out/vtsls.js"
+  postInstall = ''
+    mkdir -p $out/build
+    cp -r build/** $out/build
+    makeBinaryWrapper ${bun}/bin/bun $out/bin/${name} \
+      --add-flags "run --bun --prefer-offline --no-install $out/build/index.js"
   '';
 }
