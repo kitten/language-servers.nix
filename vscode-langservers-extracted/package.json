@@ -1,6 +1,6 @@
 {
   "name": "vscode-langservers-extracted-bin",
-  "version": "4.10.0",
+  "version": "4.8.0",
   "scripts": {
     "build:css": "ncc build vscode-css-language-server.js --no-cache --out build",
     "build:eslint": "ncc build vscode-eslint-language-server.js --no-cache --out build",
@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.3",
-    "vscode-langservers-extracted": "4.10.0"
+    "vscode-langservers-extracted": "4.8.0"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

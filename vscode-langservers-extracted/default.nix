@@ -1,4 +1,4 @@
-{ lib, bun, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 with builtins; with pkgs;
 let
@@ -6,23 +6,21 @@ let
   src = ./.;
   yarnOfflineCache = fetchYarnDeps {
     yarnLock = ./yarn.lock;
-    hash = "sha256-IBEYfVrgINScJB2Ro2cu50hP2ebQ3j7JUz6bq+uTXZQ=";
+    hash = "sha256-TXgnrF8FiNid6r7geXFzGxRmO2PtDmxQsr/IdAvPdUk=";
   };
   mkDerivationInputs = (name: yarnBuildScript: {
     inherit name src yarnOfflineCache yarnBuildScript;
     doDist = false;
-    buildInputs = [ bun ];
+    buildInputs = [ nodejs ];
     nativeBuildInputs = [
       makeBinaryWrapper
       yarnConfigHook
       yarnBuildHook
-      nodejs
     ];
     postInstall = ''
       mkdir -p $out/build
       cp -r build/** $out/build
-      makeBinaryWrapper ${bun}/bin/bun $out/bin/${name} \
-        --add-flags "run --bun --prefer-offline --no-install $out/build/index.js"
+      makeBinaryWrapper ${nodejs}/bin/node $out/bin/${name} --add-flags "$out/build/index.js"
     '';
   });
 in {
